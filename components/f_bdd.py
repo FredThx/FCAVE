@@ -3,7 +3,7 @@ import logging
 
 
 class F_Bdd:
-    '''Une base de données basées sur sqlite3
+    '''Un classe pour accéder à une base de données sqlite3
     '''
     def __init__(self, bdd_file:str):
         self.conn = sqlite3.connect(bdd_file)
@@ -11,6 +11,7 @@ class F_Bdd:
         self.structure = {} #pas sur que ce soit nécessaire
 
     def execute(self, req, values = None, commit = True):
+        logging.debug(f'execute SQL : "{req}". VALUES = {values}')
         cursor = self.conn.cursor()
         try:
             if values : 
@@ -52,7 +53,8 @@ class F_Bdd:
         '''Select from table
             table   :   table name
             cols    :   (optional) str or list of fields
-            where   :   (optional) str or dict {'field' : value} #TODO : gérer aussi GT, LT, GE, LE, IN, LIKE
+            where   :   (optional) str or dict {'field' : value}
+                        value can be a dict {'operator' : test_value}  (ex : {'$gt' : 42, '$lt' : 100}) )
         '''
         req = "SELECT "
         if cols is None:
@@ -69,16 +71,32 @@ class F_Bdd:
                 req += f" WHERE {where}"
             if type(where)==dict:
                 req += " WHERE "+ " AND ".join([self.where(field, value) for field, value in where.items()])
-        print(req)
         return self.execute(req)
 
     def where(self, field, values):
         if type(values) == list: #CLAUSE IN
             return f" {field} IN ({', '.join([self.str_value(value) for value in values])})"
         elif type(values) == dict: #CLAUSE GE, LE, GT, LT
-            logging.error("Pas encore implémenté!")
+            return " " + " AND ".join([f"{field} {self.clause_where(operator, value)}" for operator, value in values.items()])
         else:
             return f" {field}={self.str_value(values)} "
+
+    operators = {
+        '$gt' : '>',
+        '$ge' : '>=',
+        '$lt' : '<',
+        '$le' : '<=',
+        '$like' : 'LIKE'
+    }
+
+    def clause_where(self, operator:str, value):
+        ''' A partir d'un couple operator, value, venvois la clause where correspondante.
+        ex : clause_where('$gt", 42) return ">= 42"
+        '''
+        if operator in self.operators:
+            return f"{self.operators[operator]} {self.str_value(value)}"
+        else:
+            raise Exception(f'Non valide operator : {operator}. Autorised values : {self.operators.keys()}.')
 
     @staticmethod
     def str_value(value):

@@ -1,8 +1,5 @@
 from f_bdd import *
 
-
-
-
 class Cave_Bdd(F_Bdd):
     '''Une dase de donnée (sqlite3) pour stockage données cave
     '''
@@ -41,7 +38,11 @@ class Cave_Bdd(F_Bdd):
 
 
 if __name__ == '__main__':
+    from FUTIL.my_logging import *
+    my_logging(console_level = DEBUG, logfile_level = INFO, details = True)
+
     bdd = Cave_Bdd('ma_base.db')
     #print(bdd.execute("SELECT * FROM sqlite_master;"))
     #bdd.insert('vins',[{'name' : 'nom du vin', 'color' : 'Rouge'}, {'name' : 'un vin blanc', 'color' : 'Blanc'}])
     print(bdd.select('vins',['id', 'name', 'color'], {'color' : ['Rouge','Blanc']}))
+    print(bdd.select('vins',['id', 'name', 'color'], {'color' : {'$like' : 'R%'}}))
