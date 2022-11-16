@@ -10,11 +10,13 @@ class F_Bdd:
         self.conn.row_factory= sqlite3.Row
         self.structure = {} #pas sur que ce soit nécessaire
 
-    def execute(self, req, values = None, commit = True):
+    def execute(self, req, values = None, commit = True, return_count = False):
         logging.debug(f'execute SQL : "{req}". VALUES = {values}')
         cursor = self.conn.cursor()
         try:
-            if values : 
+            if values :
+                #if type(values) not in [list, tuple, dict]:
+                #    values = (values,)
                 cursor.execute(req, values)
             else:
                 cursor.execute(req)
@@ -23,7 +25,10 @@ class F_Bdd:
         except sqlite3.DatabaseError as e:
             logging.error(e)
         else:
-            return [dict(r) for r in cursor.fetchall()]
+            if return_count:
+                return cursor.rowcount
+            else:
+                return [dict(r) for r in cursor.fetchall()]
 
     def create_tables(self, structure:dict):
         '''Create all the tables
@@ -49,6 +54,26 @@ class F_Bdd:
             req = f"INSERT INTO {table} ({','.join(record.keys())}) VALUES ({','.join([':'+k for k in record.keys()])});"
             self.execute(req, record)
         
+    def delete(self, table:str, ids, id_field="id"):
+        '''Delete row(s) on table, 
+        ids     :   integer or list of integer or dict (with id_field key) or list of dict
+        exemples : 
+            self.delete('ma_table', 42)
+            self.delete('ma_table', (5,6,9))
+            self.delete('ma_table', self.select('ma_table',where={'col1' : 42}))
+        '''
+        if type(ids) not in (tuple, list):
+            ids = [ids]
+        req = f"DELETE FROM {table} WHERE {id_field} IN ({','.join('?' * len(ids))})"
+        try:
+            ids = [id[id_field] if type(id)==dict else id for id in ids]
+        except KeyError as e:
+            logging.error(e)
+            return 0
+        return self.execute(req, ids, return_count=True)
+
+
+
     def select(self, table:str, cols = None, where = None):
         '''Select from table
             table   :   table name

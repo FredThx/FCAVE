@@ -43,6 +43,8 @@ if __name__ == '__main__':
 
     bdd = Cave_Bdd('ma_base.db')
     #print(bdd.execute("SELECT * FROM sqlite_master;"))
-    #bdd.insert('vins',[{'name' : 'nom du vin', 'color' : 'Rouge'}, {'name' : 'un vin blanc', 'color' : 'Blanc'}])
+    bdd.insert('vins',[{'name' : 'Super Vin', 'color' : 'Rouge'}, {'name' : 'un vin blanc', 'color' : 'Blanc'}])
     print(bdd.select('vins',['id', 'name', 'color'], {'color' : ['Rouge','Blanc']}))
-    print(bdd.select('vins',['id', 'name', 'color'], {'color' : {'$like' : 'R%'}}))
+    #print(bdd.select('vins',['id', 'name', 'color'], {'color' : {'$like' : 'R%'}}))
+    print(f"Nb de vins suprimés : {bdd.delete('vins',bdd.select('vins',['id', 'name', 'color'], {'color' : 'Rouge'}))}")
+    print(bdd.select('vins',['id','name']))
