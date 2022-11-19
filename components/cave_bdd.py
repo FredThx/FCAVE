@@ -20,7 +20,7 @@ class Cave_Bdd(F_Bdd):
             'notes' : 'TEXT',
             '__foreign_key__' : [
                         {'key' : 'producer_id', 'table' : 'producers','foreign_key' : 'id'},
-                        {'key' : 'appellation_id', 'table' : 'appelations','foreign_key' : 'id'}]
+                        {'key' : 'appellation_id', 'table' : 'appellations','foreign_key' : 'id'}]
         },
         'producers' : {
             'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
@@ -28,9 +28,9 @@ class Cave_Bdd(F_Bdd):
             'producer_address' : 'TEXT',
             'producer_notes' : 'TEXT'
         },
-        'appelations' : {
+        'appellations' : {
             'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
-            'appelation_name' : 'TEXT',
+            'appellation_name' : 'TEXT',
             'region_id' : 'INTEGER',
             '__foreign_key__' : {'key' : 'region_id', 'table' : 'regions','foreign_key' : 'id'},
         },
@@ -47,14 +47,14 @@ class Cave_Bdd(F_Bdd):
 if __name__ == '__main__':
     from FUTIL.my_logging import *
     my_logging(console_level = DEBUG, logfile_level = INFO, details = True)
-    bdd = Cave_Bdd('ma_base.db')
+    bdd = Cave_Bdd('cave.db')
     #print(bdd.execute("SELECT * FROM sqlite_master;"))
     bordeaux = {'region_name' : 'Bordeaux'}
     bdd.insert('regions',bordeaux)
     bordeaux = bdd.select('regions','*', bordeaux)[0]
-    margaux = {'appelation_name' : "Margaux", 'region_id' : bordeaux['id']}
-    bdd.insert('appelations',margaux)
-    margaux = bdd.select('appelations','*', margaux)[0]
+    margaux = {'appellation_name' : "Margaux", 'region_id' : bordeaux['id']}
+    bdd.insert('appellations',margaux)
+    margaux = bdd.select('appellations','*', margaux)[0]
     toto = {'producer_name' : 'Toto'}
     bdd.insert('producers',toto)
     toto = bdd.select('producers',None ,toto)[0]
