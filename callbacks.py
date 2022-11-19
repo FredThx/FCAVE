@@ -32,3 +32,19 @@ def update_liste_des_vins(options):
     logging.debug(f"Liste_des_vins : {liste_des_vins}")
     return [liste_des_vins, options_values]
 
+@app.callback(
+    Output("dialogue_add", "is_open"),
+    [
+        Input("button_add", "n_clicks"),
+        Input("dialogue_add_button_add", "n_clicks"),
+    ],
+    [State("dialogue_add", "is_open")]
+)
+def toggle_dialogue_add(n_open,n_add,is_open):
+    if n_add:
+        pass
+        #TODO : ajouter le vin
+    if n_open or n_add:
+        return not is_open
+    else:
+        return is_open

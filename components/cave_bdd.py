@@ -18,6 +18,8 @@ class Cave_Bdd(F_Bdd):
             'apogee_debut' : 'TIMESTAMP',
             'apogee_fin' : 'TIMESTAMP',
             'notes' : 'TEXT',
+            'stock' : "INTEGER",
+            'price' : "FLOAT", #last price
             '__foreign_key__' : [
                         {'key' : 'producer_id', 'table' : 'producers','foreign_key' : 'id'},
                         {'key' : 'appellation_id', 'table' : 'appellations','foreign_key' : 'id'}]
@@ -37,6 +39,15 @@ class Cave_Bdd(F_Bdd):
         'regions' : {
             'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
             'region_name' : 'TEXT'
+        },
+        'mouvements' : {
+            'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
+            'vin_id' : 'INTEGER',
+            'mouvement_date' : 'TEXT',
+            'mouvement_type' : "TEXT CHECK(mouvement_type IN ('buy','use'))",
+            'mouvement_qty' : 'INTEGER',
+            'price' : "FLOAT",
+            '__foreign_key__' : {'key' : 'vin_id', 'table' : 'vins', 'foreign_key' : 'id'}
         }
     }
     def __init__(self, *args, **kwargs):
