@@ -1,18 +1,30 @@
 import sqlite3
 import logging
 
+#TODO:
+# Pour simplifier les jointures automatiques,
+# actuellement, il faut des noms de champs duistincts entre les != tables (ex name de producers = producer_name)
+# Soit
+#   - lors de la création de la base, interdir les champs commun
+#   - ne pas utiliser de select *, mais 
 
 class F_Bdd:
     '''Un classe pour accéder à une base de données sqlite3
     '''
     def __init__(self, bdd_file:str):
-        self.conn = sqlite3.connect(bdd_file)
-        self.conn.row_factory= sqlite3.Row
-        self.structure = {} #pas sur que ce soit nécessaire
+        self.bdd_file = bdd_file
+        self.structure = {}
+        self.execute("PRAGMA foreign_keys = ON;")
+
+    def get_conn(self):
+        conn = sqlite3.connect(self.bdd_file)
+        conn.row_factory= sqlite3.Row
+        return conn
 
     def execute(self, req, values = None, commit = True, return_count = False):
         logging.debug(f'execute SQL : "{req}". VALUES = {values}')
-        cursor = self.conn.cursor()
+        conn = self.get_conn()
+        cursor = conn.cursor()
         try:
             if values :
                 #if type(values) not in [list, tuple, dict]:
@@ -21,7 +33,7 @@ class F_Bdd:
             else:
                 cursor.execute(req)
             if commit:
-                self.conn.commit()
+                conn.commit()
         except sqlite3.DatabaseError as e:
             logging.error(e)
         else:
@@ -39,7 +51,17 @@ class F_Bdd:
         for table, fields in self.structure.items():
             req = f"CREATE TABLE IF NOT EXISTS {table}("
             for field, attributes in fields.items():
-                req += f"{field} {attributes}, "
+                if field[:2]!='__':
+                    req += f"{field} {attributes}, "
+                elif field == '__foreign_key__':
+                    if type(attributes) not in [list, tuple]:
+                        attributes = [attributes]
+                        self.structure[table]['__foreign_key__'] = attributes
+                    for attribute in attributes:
+                        try:
+                            req += f"FOREIGN KEY({attribute['key']}) REFERENCES {attribute['table']}({attribute['foreign_key']}), "
+                        except KeyError as e:
+                            logging.error(e)
             req = req[:-2] #Suppression du dernier ","
             req += ');'
             self.execute(req)
@@ -47,7 +69,7 @@ class F_Bdd:
     def insert(self, table:str, records:list[dict]):
         '''Insert recorsd into a table
         records : {'field_name' : 'value"}
-        '''
+        '''#TODO : renvoyer les enregistrements inserés (faire un select ou ...)
         if type(records)!=list:
             records = [records]
         for record in records:
@@ -74,7 +96,7 @@ class F_Bdd:
 
 
 
-    def select(self, table:str, cols = None, where = None):
+    def select(self, table:str, cols = None, where = None, foreign = True):
         '''Select from table
             table   :   table name
             cols    :   (optional) str or list of fields
@@ -91,14 +113,27 @@ class F_Bdd:
                 cols = [cols]
             req += ", ".join(cols)
         req += f" FROM {table}"
+        if foreign:
+            for jointure in self.jointures(table):
+                req += f" {jointure.get('join','INNER JOIN')} {jointure['table']} ON {jointure['table']}.{jointure['foreign_key']} = {jointure['table_A']}.{jointure['key']}"
         if where:
             if type(where)==str:
                 req += f" WHERE {where}"
             if type(where)==dict:
-                req += " WHERE "+ " AND ".join([self.where(field, value) for field, value in where.items()])
+                req += " WHERE "+ " AND ".join([self.where(table + "." + field, value) for field, value in where.items()])
         return self.execute(req)
 
-    def where(self, field, values):
+    def jointures(self, table)->dict:
+        '''Return the list of jointure from structure
+        '''
+        jointures = []
+        for foreign_key in self.structure[table].get('__foreign_key__', []):
+            foreign_key['table_A']=table
+            jointures.append(foreign_key)
+            jointures+=(self.jointures(foreign_key['table']))
+        return jointures
+
+    def where(self, field, values)->str:
         if type(values) == list: #CLAUSE IN
             return f" {field} IN ({', '.join([self.str_value(value) for value in values])})"
         elif type(values) == dict: #CLAUSE GE, LE, GT, LT
@@ -114,7 +149,7 @@ class F_Bdd:
         '$like' : 'LIKE'
     }
 
-    def clause_where(self, operator:str, value):
+    def clause_where(self, operator:str, value)->str:
         ''' A partir d'un couple operator, value, venvois la clause where correspondante.
         ex : clause_where('$gt", 42) return ">= 42"
         '''

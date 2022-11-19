@@ -1,4 +1,7 @@
-from f_bdd import *
+try:
+    from .f_bdd import F_Bdd
+except:
+    from f_bdd import F_Bdd
 
 class Cave_Bdd(F_Bdd):
     '''Une dase de donnée (sqlite3) pour stockage données cave
@@ -14,22 +17,26 @@ class Cave_Bdd(F_Bdd):
             'millesime' : "INTEGER",
             'apogee_debut' : 'TIMESTAMP',
             'apogee_fin' : 'TIMESTAMP',
-            'notes' : 'TEXT'
+            'notes' : 'TEXT',
+            '__foreign_key__' : [
+                        {'key' : 'producer_id', 'table' : 'producers','foreign_key' : 'id'},
+                        {'key' : 'appellation_id', 'table' : 'appelations','foreign_key' : 'id'}]
         },
         'producers' : {
             'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
-            'name' : 'TEXT',
-            'address' : 'TEXT',
-            'notes' : 'TEXT'
+            'producer_name' : 'TEXT',
+            'producer_address' : 'TEXT',
+            'producer_notes' : 'TEXT'
         },
         'appelations' : {
             'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
-            'name' : 'TEXT',
-            'region_id' : 'INTEGER'
+            'appelation_name' : 'TEXT',
+            'region_id' : 'INTEGER',
+            '__foreign_key__' : {'key' : 'region_id', 'table' : 'regions','foreign_key' : 'id'},
         },
         'regions' : {
             'id' : 'INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE',
-            'name' : 'TEXT'
+            'region_name' : 'TEXT'
         }
     }
     def __init__(self, *args, **kwargs):
@@ -40,11 +47,19 @@ class Cave_Bdd(F_Bdd):
 if __name__ == '__main__':
     from FUTIL.my_logging import *
     my_logging(console_level = DEBUG, logfile_level = INFO, details = True)
-
     bdd = Cave_Bdd('ma_base.db')
     #print(bdd.execute("SELECT * FROM sqlite_master;"))
-    bdd.insert('vins',[{'name' : 'Super Vin', 'color' : 'Rouge'}, {'name' : 'un vin blanc', 'color' : 'Blanc'}])
+    bordeaux = {'region_name' : 'Bordeaux'}
+    bdd.insert('regions',bordeaux)
+    bordeaux = bdd.select('regions','*', bordeaux)[0]
+    margaux = {'appelation_name' : "Margaux", 'region_id' : bordeaux['id']}
+    bdd.insert('appelations',margaux)
+    margaux = bdd.select('appelations','*', margaux)[0]
+    toto = {'producer_name' : 'Toto'}
+    bdd.insert('producers',toto)
+    toto = bdd.select('producers',None ,toto)[0]
+    bdd.insert('vins',[{'name' : 'Super Vin', 'color' : 'Rouge', 'producer_id' : toto['id'], 'appellation_id' : margaux['id']}, {'name' : 'un vin blanc', 'color' : 'Blanc', 'producer_id' : 42}])
     print(bdd.select('vins',['id', 'name', 'color'], {'color' : ['Rouge','Blanc']}))
     #print(bdd.select('vins',['id', 'name', 'color'], {'color' : {'$like' : 'R%'}}))
-    print(f"Nb de vins suprimés : {bdd.delete('vins',bdd.select('vins',['id', 'name', 'color'], {'color' : 'Rouge'}))}")
-    print(bdd.select('vins',['id','name']))
+    print(f"Nb de vins suprimés : {bdd.delete('vins',bdd.select('vins',['id', 'name', 'color'], {'color' : 'Blanc'}))}")
+    print(bdd.select('vins'))

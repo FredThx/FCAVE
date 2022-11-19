@@ -1,3 +1,5 @@
+*.db
+
 
 #Windows
 Thumbs.db
@@ -119,3 +121,5 @@ dmypy.json
 index.log
 users.py
 db_sms.json
+.vscode/launch.json
+
