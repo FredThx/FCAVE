@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from components.cave import Cave
 from components.cave_bdd import Cave_Bdd
 
-cave = Cave(Cave_Bdd('cave.db'))
+cave = Cave(Cave_Bdd('cave.db'), 'vins')
 
 search_bar = dbc.Row(
     [
@@ -22,7 +22,7 @@ search_bar = dbc.Row(
 
 button_add = dbc.Button(
     "Ajouter un vin", color = "primary", class_name="me-2", n_clicks=0,
-    id = "button_add"
+    id = "button_add_vin"
 )
 
 nav_bar = dbc.Navbar(
@@ -60,7 +60,7 @@ dialoque_add_vin = dbc.Modal(
     is_open = False,
 )
 
-criteres = html.Div(id="criteres")
+criteres = html.Div(id="criteres", children=cave.get_selecteurs())
 
 liste_des_vins = dbc.Row(id="liste_des_vins")
 

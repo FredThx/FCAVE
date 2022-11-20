@@ -12,7 +12,7 @@ class Cave_Bdd(F_Bdd):
             'name' : 'TEXT',
             'producer_id' : 'INTEGER',
             'appellation_id' : 'INTEGER',
-            'color' : "TEXT CHECK( color IN ('Rouge', 'Blanc', 'Rosé'))",
+            'color' : "TEXT CHECK( color IN ('rouge', 'blanc', 'rosé'))",
             'props' : "TEXT",
             'millesime' : "INTEGER",
             'apogee_debut' : 'TIMESTAMP',
@@ -69,8 +69,8 @@ if __name__ == '__main__':
     toto = {'producer_name' : 'Toto'}
     bdd.insert('producers',toto)
     toto = bdd.select('producers',None ,toto)[0]
-    bdd.insert('vins',[{'name' : 'Super Vin', 'color' : 'Rouge', 'producer_id' : toto['id'], 'appellation_id' : margaux['id']}, {'name' : 'un vin blanc', 'color' : 'Blanc', 'producer_id' : 42}])
-    print(bdd.select('vins',['id', 'name', 'color'], {'color' : ['Rouge','Blanc']}))
+    bdd.insert('vins',[{'name' : 'Super Vin', 'color' : 'rouge', 'producer_id' : toto['id'], 'appellation_id' : margaux['id']}, {'name' : 'un vin blanc', 'color' : 'blanc', 'producer_id' : 42}])
+    print(bdd.select('vins',['id', 'name', 'color'], {'color' : ['rouge','blanc']}))
     #print(bdd.select('vins',['id', 'name', 'color'], {'color' : {'$like' : 'R%'}}))
-    print(f"Nb de vins suprimés : {bdd.delete('vins',bdd.select('vins',['id', 'name', 'color'], {'color' : 'Blanc'}))}")
+    print(f"Nb de vins suprimés : {bdd.delete('vins',bdd.select('vins',['id', 'name', 'color'], {'color' : 'blanc'}))}")
     print(bdd.select('vins'))

@@ -8,16 +8,17 @@ from .card_vin import CardVin
 class Cave():
     '''Une application de gestion de cave
     '''
-    def __init__(self, bdd):
+    def __init__(self, bdd, table):
         self.bdd = bdd
+        self.table = table
         self.options =  []
         self.fields = []
         #TODO : mettre ça ailleurs (et donc renommer la classe en un truc de générique)
         f_name = FieldText(bdd, "name", table = 'vins', name = "Nom", placeholder = "Nom du vin")
         f_color = FieldTextList(bdd, "color", table = 'vins', name = "Couleur", placeholder = "Couleur du vin", values = ["rouge","blanc", "rosé"])
-        f_region = FieldTextForeign(bdd, "region_name", table = "regions", linked_table = 'appellations', name ="Région")
-        f_appellation = FieldTextForeign(bdd, "appellation_name", table = "appellations", linked_table = 'vins', name = "Appellation")
-        f_producer = FieldTextForeign(bdd, "producer_name", table = "producers", linked_table = 'vins', name = "Producteur")
+        f_region = FieldTextForeign(bdd, "region_name", table = "regions", linked_table = 'appellations', foreign_field = 'region_id', name ="Région")
+        f_appellation = FieldTextForeign(bdd, "appellation_name", table = "appellations", linked_table = 'vins', foreign_field = 'appellation_id',name = "Appellation")
+        f_producer = FieldTextForeign(bdd, "producer_name", table = "producers", linked_table = 'vins', foreign_field = 'producer_id', name = "Producteur")
         f_props = FieldText(bdd, "props", table = 'vins', name = "Propriétes", placeholder = "Propriétés de ce vin (ex : sec/doux, ...)")
         f_millesime = FieldInteger(bdd, "millesime", table = 'vins', name = "Millésime", min = 1900, max = 3000)
         f_apogee_debut = FieldInteger(bdd, "apogee_debut", table = 'vins', name = "Apogée début", min = 1900, max = 3000)
@@ -58,3 +59,26 @@ class Cave():
 
     def get_input_groups(self, root_id = "")->list[dbc.InputGroup]:
         return [field.get_input_group(root_id) for field in self.fields]
+    
+    def get_fields(self):
+        '''renvoie la liste des champs réels (ie pour les FieldRange : les 2 champs)
+        '''
+        return [field for fields in [field.get_fields() for field in self.fields] for field in fields]
+
+    def get_input_ids(self, root_id:str)->list[str]:
+        return [field.input_id(root_id) for field in self.get_fields()]
+
+    def bdd_insert(self, root_id, data:dict)->None:
+        '''Insert un nouvel enregistrement
+        data : {'input_id' : 'valeur saisie'}
+        '''
+        values_to_insert = {}
+        for field in self.get_fields():
+            if data[field.input_id(root_id)] is not None:
+                if field.table == self.table:
+                    values_to_insert[field.field]=data[field.input_id(root_id)]
+                else:
+                    values_to_insert[field.foreign_field]=data[field.input_id(root_id)]
+        logging.debug(f"bdd_insert : {values_to_insert}")
+        self.bdd.insert(self.table, values_to_insert)
+        

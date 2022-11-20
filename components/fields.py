@@ -14,6 +14,9 @@ class Field:
     def get_selecteur_id(self)->str:
         return f"option_{self.name}"
     
+    def get_fields(self):
+        return [self]
+
     @property
     def tooltip(self)->str:
         try:
@@ -41,7 +44,10 @@ class FieldText(Field):
         self.field = field
         self.table = table
         self.placeholder = placeholder or self.name
-        
+
+    def input_id(self, root_id:str)->str:
+        return f"{root_id}_{self.field}"
+
     def get_selecteur(self)->html.Div:
         '''
         '''
@@ -97,8 +103,9 @@ class FieldTextList(FieldText):
 class FieldTextForeign(FieldText):
     '''Un champ lié à une table ex : producteur
     '''
-    def __init__(self, bdd:Cave_Bdd, field:str, table:str, linked_table:str, foreign_key:str = 'id', name:str=None, placeholder:str=None):
+    def __init__(self, bdd:Cave_Bdd, field:str, table:str, linked_table:str, foreign_field:str = None, foreign_key:str = 'id', name:str=None, placeholder:str=None):
         super().__init__(bdd, field, table, name, placeholder)
+        self.foreign_field = foreign_field or f"{self.table[-1]}_id"
         self.linked_table = linked_table
         self.foreign_key = foreign_key
 
@@ -151,15 +158,19 @@ class FieldRange(Field):
         super().__init__(bdd, name)
         self.field_min = field_min
         self.field_max = field_max
-        
     
+    def get_fields(self):
+        return [self.field_min, self.field_max]
+
     def get_input_group(self, root_id = "")-> dbc.InputGroup:
         return dbc.InputGroup(
             [
                 dbc.InputGroupText(self.name),
-                self.field_min.get_input(),
-                self.field_max.get_input()
+                self.field_min.get_input(root_id),
+                self.field_max.get_input(root_id)
             ], className = "mb-3"
             )
     get_input = get_input_group
     
+    def input_id(self, root_id: str) -> list:
+        return [self.field_min.input_id(root_id), self.field_max.input_id(root_id)]
