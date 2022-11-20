@@ -1,5 +1,9 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+from components.cave import Cave
+from components.cave_bdd import Cave_Bdd
+
+cave = Cave(Cave_Bdd('cave.db'))
 
 search_bar = dbc.Row(
     [
@@ -47,28 +51,10 @@ nav_bar = dbc.Navbar(
 dialoque_add = dbc.Modal(
     [
         dbc.ModalHeader(dbc.ModalTitle("Ajout d'un vin")),
-        dbc.ModalBody([
-            dbc.InputGroup(
-                    [dbc.InputGroupText("Nom"), dbc.Input(id = "dialogue_add_name", placeholder="Nom du vin")],
-                    className="mb-3",
-                ),
-            dbc.InputGroup(
-                    [
-                        dbc.InputGroupText("Couleur"),
-                        dbc.Select(
-                            options=[
-                                {"label": "Rouge", "value": "blanc"},
-                                {"label": "Blanc", "value": "rouge"},
-                                {"label": "Rosé", "value": "rosé"},
-                            ],
-                            id = "dialogue_add_color",
-                        ),
-                    ]
-                ),       
-        ]),
+        dbc.ModalBody(cave.get_input_groups("dialogue_add_vin")),
         dbc.ModalFooter(
             dbc.Button(
-                "Add", id="dialogue_add_button_add", className="ms-auto", n_clicks=0
+                "Add", id="dialogue_add_vin_button_add", className="ms-auto", n_clicks=0
             )
         ),
     ],

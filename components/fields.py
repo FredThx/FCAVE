@@ -15,6 +15,9 @@ class Field:
             return self.placeholder
         except AttributeError:
             return ""
+    
+    def input_id(self, root_id):
+        return f"{root_id}_{self.name}"
 
 class FieldText(Field):
     """ Un champ de type texte
@@ -48,16 +51,28 @@ class FieldText(Field):
             if value and value not in choices:
                 choices.append(value)
         return choices
+    
+    def get_input_group(self, root_id = "")->dbc.InputGroup:
+        return dbc.InputGroup(
+            [dbc.InputGroupText(self.name), dbc.Input(id = self.input_id(root_id), placeholder=self.placeholder)],
+            className="mb-3")
 
 class FieldTextList(FieldText):
     '''Un champ de type text avec liste d'option (ex : couleur = ['rouge', 'rosé','blanc'])
     '''
-    def __init__(self, field, table, name = None, choices = None, placeholder = None):
+    def __init__(self, field, table, name = None, values = None, placeholder = None):
         super().__init__(field, table, name = name, placeholder = placeholder)
-        self.choices = choices or []
+        self.values = values or []
     
     def add_choice(self, choice):
         self.choices.append(choice)
+
+    def get_input_group(self, root_id = "")->dbc.InputGroup:
+        return dbc.InputGroup(
+                    [   dbc.InputGroupText(self.name),
+                        dbc.Select(
+                            options = [{"label" : value.capitalize(), "value" : value} for value in self.values],
+                            id = self.input_id(root_id))])
     
 class FieldTextForeign(FieldText):
     '''Un champ lié à une table ex : producteur
@@ -67,3 +82,19 @@ class FieldTextForeign(FieldText):
         self.link_table = link_table
         self.foreign_key = foreign_key
 
+class FieldInteger(FieldText):
+    '''Un champ Integer
+    '''
+    def __init__(self, field, table, name=None, placeholder=None, min = None, max = None, step = 1):
+        super().__init__(field, table, name, placeholder)
+        self.min = min
+        self.max = max
+        self.step = step
+
+    def get_input_group(self, root_id = "")->dbc.InputGroup:
+        return dbc.InputGroup(
+            [   dbc.InputGroupText(self.name),
+                dbc.Input(
+                    type = "number", min = self.min, max = self.max, step = self.step,
+                    id = self.input_id(root_id), placeholder=self.placeholder)],
+            className="mb-3")

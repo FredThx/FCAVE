@@ -36,7 +36,7 @@ def update_liste_des_vins(options):
     Output("dialogue_add", "is_open"),
     [
         Input("button_add", "n_clicks"),
-        Input("dialogue_add_button_add", "n_clicks"),
+        Input("dialogue_add_vin_button_add", "n_clicks"),
     ],
     [State("dialogue_add", "is_open")]
 )
