@@ -48,14 +48,12 @@ nav_bar = dbc.Navbar(
     dark = True
 )
 
-dialoque_add = dbc.Modal(
+dialoque_add_vin = dbc.Modal(
     [
         dbc.ModalHeader(dbc.ModalTitle("Ajout d'un vin")),
         dbc.ModalBody(cave.get_input_groups("dialogue_add_vin")),
         dbc.ModalFooter(
-            dbc.Button(
-                "Add", id="dialogue_add_vin_button_add", className="ms-auto", n_clicks=0
-            )
+            dbc.Button("Add", id="dialogue_add_vin_button_add", className="ms-auto", n_clicks=0)
         ),
     ],
     id = "dialogue_add",
@@ -80,7 +78,7 @@ body = dbc.Container([
         dbc.Col(liste_des_vins)
         ]),
     load_page,
-    dialoque_add,
+    dialoque_add_vin,
 ])
 
 
