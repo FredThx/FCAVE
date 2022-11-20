@@ -1,6 +1,6 @@
 import logging
 
-from .options import CaveOption
+from .fields import Field, FieldText, FieldTextList, FieldTextForeign
 
 class Cave():
     '''Une application de gestion de cave
@@ -18,11 +18,17 @@ class Cave():
         return [CardVin(vin) for vin in self.get_vins(*args, **kwargs)]
     
     options = [
-        CaveOption("color", "Couleur", "Couleur du vin"),
-        CaveOption("region_name", "Région"),
-        CaveOption("appellation_name", "Appellation"),
-        CaveOption("producer_name", "Producteur"),
-    ]
+        FieldText("name", table = 'vins', name = "Nom", placeholder = "Nom du vin"),
+        FieldTextList("color", table = 'vins', name = "Couleur", placeholder = "Couleur du vin"),
+        FieldTextForeign("region_name", table = "regions", link_table = 'appellations', name ="Région"),
+        FieldTextForeign("appellation_name", table = "appellations", link_table = 'vins', name = "Appellation"),
+        FieldTextForeign("producer_name", table = "producers", link_table = 'vins', name = "Producteur"),
+    ]#TODO : sortir ça d'ici avec :
+
+    def add_options(self, options:list[Field]):
+        if type(options)!=list:
+            options = [options]
+        self.options += options
 
     def get_selecteurs(self):
         '''Renvoie la liste des selecteurs (options)
@@ -31,3 +37,7 @@ class Cave():
     
     def get_selecteurs_id(self):
         return [option.get_selecteur_id() for option in self.options]
+
+    fields = {
+
+    }
