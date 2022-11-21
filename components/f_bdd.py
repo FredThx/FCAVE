@@ -120,10 +120,10 @@ class F_Bdd:
             if type(where)==str:
                 req += f" WHERE {where}"
             if type(where)==dict:
-                req += " WHERE "+ " AND ".join([self.where(table + "." + field, value) for field, value in where.items()])
+                req += " WHERE "+ " AND ".join([self.where(table, field, value) for field, value in where.items()])
         return self.execute(req)
 
-    def jointures(self, table)->dict:
+    def jointures(self, table)->list[dict]:
         '''Return the list of jointure from structure
         '''
         jointures = []
@@ -133,7 +133,13 @@ class F_Bdd:
             jointures+=(self.jointures(foreign_key['table']))
         return jointures
 
-    def where(self, field, values)->str:
+    def where(self, table, field, values)->str:
+        if field in self.structure.get(table):
+            field = f"{table}.{field}"
+        else:
+            for jointure in self.jointures(table):
+                if field in self.structure.get(jointure['table']):
+                    field = f"{jointure['table']}.{field}"
         if type(values) == list: #CLAUSE IN
             return f" {field} IN ({', '.join([self.str_value(value) for value in values])})"
         elif type(values) == dict: #CLAUSE GE, LE, GT, LT

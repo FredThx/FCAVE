@@ -64,11 +64,8 @@ criteres = html.Div(id="criteres", children=cave.get_selecteurs())
 
 liste_des_vins = dbc.Row(id="liste_des_vins")
 
-load_page = dcc.Interval(
+load_page = html.Div(
     id = "load_page",
-    n_intervals=0,
-    max_intervals=0,
-    interval=1
 )
 
 body = dbc.Container([

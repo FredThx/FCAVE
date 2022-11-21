@@ -12,7 +12,7 @@ class Field:
         self.name = name
 
     def get_selecteur_id(self)->str:
-        return f"option_{self.name}"
+        return f"__option__{self.name}"
     
     def get_fields(self):
         return [self]
@@ -112,8 +112,8 @@ class FieldTextForeign(FieldText):
     
     def get_input(self, root_id:str = "") -> dbc.Select:
         return dbc.Select(
-                    options = [{"label" : row.get(self.name), "value" : row.get(self.foreign_key)} for row in self.get_foreign()]
-                            + [{"label" : f"<Nouveau {self.name}", "value" : "new"}],
+                    options = [{"label" : row.get(self.field), "value" : row.get(self.foreign_key)} for row in self.get_foreign()]
+                            + [{"label" : f"<Nouveau {self.name}>", "value" : "new"}],
                     id = self.input_id(root_id))
     
     def get_foreign(self)->list[dict]:
