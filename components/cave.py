@@ -1,8 +1,8 @@
 import logging
 import dash_bootstrap_components as dbc
 
-from .fields import Field, FieldText, FieldTextList, FieldTextForeign, FieldInteger, FieldRange, FieldtextArea, FieldFloat
-from .card_vin import CardVin
+from .field import Field, FieldText, FieldTextList, FieldTextForeign, FieldInteger, FieldRange, FieldtextArea, FieldFloat
+from .vin import Vin
 
 
 class Cave():
@@ -47,12 +47,12 @@ class Cave():
             option = options.get(field.get_selecteur_id())
             if option:
                 filter[field.field] = option
-        vins = self.bdd.select('vins', where = filter)
+        vins = [Vin(self.bdd,**data) for data in self.bdd.select('vins', where = filter)]
         logging.debug(f"get_vins():{vins}")
         return vins or []
 
     def get_cards_vins(self, *args, **kwargs):
-        return [CardVin(vin) for vin in self.get_vins(*args, **kwargs)]
+        return [vin.get_card() for vin in self.get_vins(*args, **kwargs)]
 
     def get_selecteurs(self):
         '''Renvoie la liste des selecteurs (options)

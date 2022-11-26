@@ -1,6 +1,7 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from components.cave_bdd import Cave_Bdd
+from .vin import Vin
 
 
 class Field:
@@ -61,7 +62,7 @@ class FieldText(Field):
                                         target = self.get_selecteur_id())
                         ])
                         
-    def get_choices(self, vins:list[dict])->list[str]:
+    def get_choices(self, vins:list[Vin])->list[str]:
         '''renvoie la liste des choix possibles
             vins    :   liste des vins resulats du filtrage
         '''

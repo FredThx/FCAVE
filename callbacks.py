@@ -29,7 +29,8 @@ def update_liste_des_vins(options, _):
 @app.callback(
     [
         Output("dialogue_add", "is_open"),
-        Output('load_page', "n_clicks")
+        Output('load_page', "n_clicks"),
+        [Output(id, 'value') for id in cave.get_input_ids('dialogue_add_vin')], #Les champs de la boite de dialogue
     ],
     [
         Input("button_add_vin", "n_clicks"),
@@ -41,13 +42,13 @@ def update_liste_des_vins(options, _):
         {id : State(id, 'value') for id in cave.get_input_ids('dialogue_add_vin')}, #Les champs de la boite de dialogue
     ]
 )
-def toggle_dialogue_add(n_open,n_add,is_open, load_page_n_clicks, values):
+def toggle_dialogue_add(n_open, n_add, is_open, load_page_n_clicks, values):
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if  changed_id == "dialogue_add_vin_button_add.n_clicks":
         logging.debug(f"Ajout du vin. values = {values}")
         cave.bdd_insert('dialogue_add_vin', values)
         load_page_n_clicks = load_page_n_clicks or + 1 #Pour recharger la liste des vins
     if n_open or n_add:
-        return [not is_open, load_page_n_clicks]
+        return [not is_open, load_page_n_clicks, [None for id in cave.get_input_ids('dialogue_add_vin')]]
     else:
-        return [is_open, load_page_n_clicks]
+        return [is_open, load_page_n_clicks, [None for id in cave.get_input_ids('dialogue_add_vin')]]

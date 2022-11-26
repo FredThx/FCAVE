@@ -71,7 +71,7 @@ load_page = html.Div(
 body = dbc.Container([
     dbc.Row(nav_bar),
     dbc.Row([
-        dbc.Col(criteres),
+        dbc.Col(criteres, width = 3),
         dbc.Col(liste_des_vins)
         ]),
     load_page,
