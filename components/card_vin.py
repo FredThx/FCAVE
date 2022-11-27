@@ -23,9 +23,10 @@ class CardVin(dbc.Card):
             'color' : "grey"
         }
             }
-    def __init__(self, vin):
+    def __init__(self, vin, collapse = False):
         super().__init__(style={"width": "18rem"})
         self.vin = vin
+        self.collapse = collapse
         self.children = self.render()
         self.className = "w-25 mx-1 my-1"
         for attr_color, value in self.colors.get(vin.color).items():
@@ -35,24 +36,32 @@ class CardVin(dbc.Card):
     def data(self):
         return self.vin.__dict__
 
+    @property
+    def id(self):
+        return f"CardVin_{self.data['id']}"
+
     def render(self):
-        id = f"CardVin_{self.data['id']}" #juste pour tooltip
         return [
-            dbc.CardHeader(html.H4(f"{self.data['name']} {self.data['millesime']}"), id = id),
-            dbc.CardImg(src = "/static/images/fitou.jpg", top = True),
-            #dbc.CardBody([html.P("todo")]),
-            dbc.CardBody([
-                html.H6(self.vin.appellation, className = "card-title"),
-                html.P(f"Apogée entre {self.data['apogee_debut'] or '___'} et {self.data['apogee_fin'] or '___'}.", className = "card-text"),
-                html.P(f"Stock : {self.data['stock'] or 0}", className = "card-text"),
-            ]),
-            dbc.CardFooter(
-                dbc.Row([
-                    dbc.Col(dbc.Button("Details", color="primary", id = "id"+"_bt_edit"), width = 5),
-                    dbc.Col(dbc.Button("Supprime", color="primary", id = "id"+"_bt_remove"), width =5),
-                ]),
+            dbc.CardHeader(html.H4(f"{self.data['name']} {self.data['millesime']}"), id = self.id),
+            dbc.Collapse(
+                    [
+                    dbc.CardImg(src = "/static/images/fitou.jpg", top = True),
+                    #dbc.CardBody([html.P("todo")]),
+                    dbc.CardBody([
+                        html.H6(self.vin.appellation, className = "card-title"),
+                        html.P(f"Apogée entre {self.data['apogee_debut'] or '___'} et {self.data['apogee_fin'] or '___'}.", className = "card-text"),
+                        html.P(f"Stock : {self.data['stock'] or 0}", className = "card-text"),
+                    ]),
+                    dbc.CardFooter(
+                        dbc.Row([
+                            dbc.Col(dbc.Button("Details", color="primary", id = f"{self.id}_bt_edit"), width = 5),
+                            dbc.Col(dbc.Button("Supprime", color="primary", id = f"{self.id}_bt_remove"), width =5),
+                        ]),
+                    ),
+                ],
+                id = f"{self.id}_collapse", is_open= not self.collapse,
             ),
-            dbc.Tooltip("todo : tooltip header", placement = "top", target= id)
+            dbc.Tooltip("todo : tooltip header", placement = "top", target= self.id)
             ]
 
 

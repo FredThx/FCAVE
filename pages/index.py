@@ -25,6 +25,14 @@ button_add = dbc.Button(
     id = "button_add_vin"
 )
 
+switch_collapse_on_off = dbc.Switch(
+    label = "détails visibles",
+    value = False,
+    id = "switch_collapse_on_off",
+    class_name="me-2 text-light",
+)
+
+
 nav_bar = dbc.Navbar(
     dbc.Container(
         [
@@ -32,7 +40,6 @@ nav_bar = dbc.Navbar(
                 dbc.Row(
                     [
                         dbc.Col(html.Img(src="./static/images/cave.ico", height="30px")),
-                        dbc.Col(dbc.Navbar("Cave", className = "ms-2"))
                     ],
                     align = "center",
                     className="g-0"
@@ -40,6 +47,8 @@ nav_bar = dbc.Navbar(
                 href = "",
                 style={"textDecoration": "none"}
             ),
+            dbc.Col(html.H2("Ma cave"),className = "text-ligh"),
+            switch_collapse_on_off,
             search_bar,
             button_add
         ]
