@@ -42,7 +42,25 @@ class CardVin(dbc.Card):
 
     def render(self):
         return [
-            dbc.CardHeader(html.H4(f"{self.data['name']} {self.data['millesime']}"), id = self.id),
+            dbc.CardHeader(
+                    dbc.Row([
+                        dbc.Col(
+                            html.H4(f"{self.data['name']} {self.data['millesime']}")
+                        ),
+                        dbc.Col(
+                            dbc.Switch(
+                                value = not self.collapse,
+                                id = {
+                                    'type' : "dynamic_bt_collapse",
+                                    'index' : f"{self.id}_collapse"
+                                },
+                                class_name="me-2"
+                            ),
+                            align="start",
+                        ),
+                    ],
+                    justify="end",
+                    id = self.id)),
             dbc.Collapse(
                     [
                     dbc.CardImg(src = "/static/images/fitou.jpg", top = True),

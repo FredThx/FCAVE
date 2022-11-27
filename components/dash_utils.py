@@ -10,8 +10,11 @@ def change_props(components, id, prop, value):
         components = [components]
     for component in components:
         if type(component)==dict and 'props' in component:
-            if component['props'].get('id') and re.match(id, component['props'].get('id')):
+            if type(id)==str and type(component['props'].get('id'))==str and re.match(id, component['props'].get('id')):
                 component['props'][prop]=value
+            elif type(id)==dict and type(component['props'].get('id'))==dict:
+                if all([re.match(id[_prop], component['props'].get('id').get(_prop,'')) for _prop in id]):
+                    component['props'][prop] = value
             if "children" in component['props']:
                 change_props(component['props']['children'], id, prop, value)
     
