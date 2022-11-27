@@ -8,6 +8,10 @@ import logging
 #   - lors de la création de la base, interdir les champs commun
 #   - ne pas utiliser de select *, mais 
 
+# Note : il existe une lib : sqlite-utils qui fait aussi des choses bien!
+# j'ai un peu réinventé la roue ici!!!
+
+
 class F_Bdd:
     '''Un classe pour accéder à une base de données sqlite3
     '''
@@ -35,7 +39,7 @@ class F_Bdd:
             if commit:
                 conn.commit()
         except sqlite3.DatabaseError as e:
-            logging.error(e)
+            logging.error(f"Error on sqlite3.cursor.execute('{req}'({values}) : {e}")
         else:
             if return_count:
                 return cursor.rowcount
@@ -115,7 +119,7 @@ class F_Bdd:
         req += f" FROM {table}"
         if foreign:
             for jointure in self.jointures(table):
-                req += f" {jointure.get('join','INNER JOIN')} {jointure['table']} ON {jointure['table']}.{jointure['foreign_key']} = {jointure['table_A']}.{jointure['key']}"
+                req += f" {jointure.get('join','LEFT JOIN')} {jointure['table']} ON {jointure['table']}.{jointure['foreign_key']} = {jointure['table_A']}.{jointure['key']}"
         if where:
             if type(where)==str:
                 req += f" WHERE {where}"
