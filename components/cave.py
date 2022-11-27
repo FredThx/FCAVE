@@ -41,14 +41,14 @@ class Cave():
         self.fields += fields
 
     def get_vins(self, options = None)->list[dict]:
-        logging.debug(f"get_vins()...")
+        #logging.debug(f"get_vins()...")
         filter = {}
         for field in self.options:
             option = options.get(field.get_selecteur_id())
             if option:
                 filter[field.field] = option
         vins = [Vin(self.bdd,**data) for data in self.bdd.select('vins', where = filter)]
-        logging.debug(f"get_vins():{vins}")
+        #logging.debug(f"get_vins():{vins}")
         return vins or []
 
     def get_cards_vins(self, *args, **kwargs):
