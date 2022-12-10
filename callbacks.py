@@ -17,6 +17,7 @@ cave = Cave(Cave_Bdd('cave.db'), 'vins')
     [
         {id : Input(id, 'value') for id in cave.get_selecteurs_id()},
         Input("load_page","n_clicks"),
+        Input("text_search", "value"),
         Input("switch_collapse_on_off", "value"),
         Input({'type': 'dynamic_bt_collapse', 'index': dash.ALL}, 'value'),
     ],
@@ -27,7 +28,7 @@ cave = Cave(Cave_Bdd('cave.db'), 'vins')
     ]
 
 )
-def update_liste_des_vins(options, load_page, switch_collapse_on_off, dynamic_bt_collapse_value, liste_des_vins, options_values, dynamic_bt_collapse_id):
+def update_liste_des_vins(options, load_page, text_search, switch_collapse_on_off, dynamic_bt_collapse_value, liste_des_vins, options_values, dynamic_bt_collapse_id):
     options = options
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     logging.debug(f"Callback update_liste_des_vins. changed_id = {changed_id}. options = {options},  switch_collapse_on_off = {switch_collapse_on_off}")
@@ -39,7 +40,7 @@ def update_liste_des_vins(options, load_page, switch_collapse_on_off, dynamic_bt
         index = [x['index'] for x in dynamic_bt_collapse_id].index(bt_id)
         change_props(liste_des_vins, bt_id, "is_open", dynamic_bt_collapse_value[index])
     else:
-        vins = cave.get_vins(options)
+        vins = cave.get_vins(options, text_search)
         liste_des_vins = [CardVin(vin, not switch_collapse_on_off) for vin in vins]
         options_values = [option.get_choices(vins) for option in cave.options]
     #logging.debug(f"Liste_des_vins : {liste_des_vins}")

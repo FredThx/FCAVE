@@ -40,7 +40,9 @@ class Cave():
             fields = [fields]
         self.fields += fields
 
-    def get_vins(self, options = None)->list[dict]:
+    def get_vins(self, options = None, text_search:str = None)->list[dict]:
+        '''Renvoie la liste des vins qui correspondent aux oprtions et texte de recherche
+        '''
         #logging.debug(f"get_vins()...")
         filter = {}
         for field in self.options:
@@ -48,6 +50,8 @@ class Cave():
             if option:
                 filter[field.field] = option
         vins = [Vin(self.bdd,**data) for data in self.bdd.select('vins', where = filter)]
+        if text_search:
+            vins = [vin for vin in vins if vin.match_text(text_search)]
         #logging.debug(f"get_vins():{vins}")
         return vins or []
 

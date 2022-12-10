@@ -1,4 +1,5 @@
 from .card_vin import CardVin
+from unidecode import unidecode
 
 class Vin:
     '''Un vin
@@ -11,7 +12,7 @@ class Vin:
     def appellation(self):
         '''Renvoie le nom de l'appellation
         '''
-        if self.appellation_id:
+        if self.get('appellation_id'):
             result = self.bdd.select('appellations', 'appellation_name', {'id' : self.appellation_id}, False)
             if result:
                 return result[0]['appellation_name']
@@ -27,4 +28,15 @@ class Vin:
 
     def get_card(self):
         return CardVin(self)
+
+    def match_text(self, text):
+        '''Return true if the searched text is in props
+        '''
+        text = unidecode(text).casefold()
+        for prop in self.__dict__:
+            if prop not in ['bdd', 'id']:
+                if type(self.get(prop))==str and text in unidecode(self.get(prop)).casefold():
+                    return True
+        return False
+
     
