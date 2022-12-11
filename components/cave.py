@@ -13,6 +13,7 @@ class Cave():
         self.table = table
         self.options =  []
         self.fields = []
+        self._actives_cards_vins = {} # {'card_id' : vin}
         #TODO : mettre ça ailleurs (et donc renommer la classe en un truc de générique)
         f_name = FieldText(bdd, "name", table = 'vins', name = "Nom", placeholder = "Nom du vin")
         f_color = FieldTextList(bdd, "color", table = 'vins', name = "Couleur", placeholder = "Couleur du vin", values = ["rouge","blanc", "rosé"])
@@ -55,8 +56,22 @@ class Cave():
         #logging.debug(f"get_vins():{vins}")
         return vins or []
 
-    def get_cards_vins(self, *args, **kwargs):
-        return [vin.get_card() for vin in self.get_vins(*args, **kwargs)]
+    def get_cards_vins(self, collapse = False, *args, **kwargs):
+        '''Renvoie la liste des vins sous forme de CardVin
+        et met en cache un dict {'card_id' : vin}
+        '''
+        cards = [vin.get_card(collapse) for vin in self.get_vins(*args, **kwargs)]
+        self._actives_cards_vins = {card.id : card.vin for card in cards} 
+        return cards
+    
+    @property
+    def actives_vins(self)->list[Vin]:
+        ''' Renvoie la liste des vins actifs
+        '''
+        return [vin for id,vin in self._actives_cards_vins.items()]
+
+    def get_active_vin_by_card_id(self, card_id:str)->Vin:
+        return self._actives_cards_vins[card_id]
 
     def get_selecteurs(self):
         '''Renvoie la liste des selecteurs (options)
@@ -69,13 +84,16 @@ class Cave():
     def get_input_groups(self, root_id = "")->list[dbc.InputGroup]:
         return [field.get_input_group(root_id) for field in self.fields]
     
-    def get_fields(self):
+    def get_fields(self)->list[Field]:
         '''renvoie la liste des champs réels (ie pour les FieldRange : les 2 champs)
         '''
         return [field for fields in [field.get_fields() for field in self.fields] for field in fields]
 
     def get_input_ids(self, root_id:str)->list[str]:
         return [field.input_id(root_id) for field in self.get_fields()]
+    
+    def get_input_values(self, vin: Vin)->list:
+        return [vin.__getattribute__(field.field) for field in self.get_fields()]
 
     def bdd_insert(self, root_id, data:dict)->None:
         '''Insert un nouvel enregistrement

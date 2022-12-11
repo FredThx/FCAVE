@@ -40,9 +40,8 @@ def update_liste_des_vins(options, load_page, text_search, switch_collapse_on_of
         index = [x['index'] for x in dynamic_bt_collapse_id].index(bt_id)
         change_props(liste_des_vins, bt_id, "is_open", dynamic_bt_collapse_value[index])
     else:
-        vins = cave.get_vins(options, text_search)
-        liste_des_vins = [CardVin(vin, not switch_collapse_on_off) for vin in vins]
-        options_values = [option.get_choices(vins) for option in cave.options]
+        liste_des_vins = cave.get_cards_vins(not switch_collapse_on_off, options, text_search)
+        options_values = [option.get_choices(cave.actives_vins) for option in cave.options]
     #logging.debug(f"Liste_des_vins : {liste_des_vins}")
     return [liste_des_vins, options_values]
 
@@ -72,4 +71,38 @@ def toggle_dialogue_add(n_open, n_add, is_open, load_page_n_clicks, values):
         return [not is_open, load_page_n_clicks, [None for id in cave.get_input_ids('dialogue_add_vin')]]
     else:
         return [is_open, load_page_n_clicks, [None for id in cave.get_input_ids('dialogue_add_vin')]]
+
+
+@app.callback(
+    [
+        Output("dialogue_details", "is_open"),
+        #Output('load_page', "n_clicks"),
+        [Output(id, 'value') for id in cave.get_input_ids('dialogue_details_vin')], #Les champs de la boite de dialogue
+    ],
+    [
+        Input("dialogue_details_vin_button_save", "n_clicks"),
+        Input({'type': 'dynamic_bt_edit', 'index': dash.ALL}, 'n_clicks'),
+    ],
+    [
+        State("liste_des_vins", "children"),
+        State("dialogue_details", "is_open"),
+        State("load_page", "n_clicks"),
+        {id : State(id, 'value') for id in cave.get_input_ids('dialogue_details_vin')}, #Les champs de la boite de dialogue
+        State({'type': 'dynamic_bt_edit', 'index': dash.ALL}, 'id'),
+    ]
+)
+def toggle_dialogue_details_vin(n_save, dynamic_bt_edit_n_clicks, liste_des_vins, is_open, load_page_n_clicks, values, dynamic_bt_edit_id):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    if liste_des_vins and re.match('{"index":"CardVin_\d+_bt_edit","type":"dynamic_bt_edit"}.n_clicks', changed_id):
+        bt_id = re.search(r"CardVin_\d+_bt_edit", changed_id).group(0)
+        index = [x['index'] for x in dynamic_bt_edit_id].index(bt_id)
+        if dynamic_bt_edit_n_clicks[index]: # TODO : changer ça : quand le bouton a été cliké une fois => pas remis à 0!!!
+            vin = cave.get_active_vin_by_card_id(liste_des_vins[index]['props']['id'])
+            values = cave.get_input_values(vin)
+            logging.debug(f"BT {bt_id} pressed pour {vin}")
+            return [True, values]
+    if n_save:
+        #TODO : appliquer modifs
+        pass
+    return [False, [None for id in cave.get_input_ids('dialogue_details_vin')]]
 

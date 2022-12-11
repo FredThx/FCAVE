@@ -3,7 +3,9 @@ import dash_bootstrap_components as dbc
 from components.cave import Cave
 from components.cave_bdd import Cave_Bdd
 
+
 cave = Cave(Cave_Bdd('cave.db'), 'vins')
+
 
 search_bar = dbc.Row(
     dbc.Col(dbc.Input(type="search", id = "text_search", placeholder="Search")),
@@ -60,6 +62,22 @@ dialoque_add_vin = dbc.Modal(
     is_open = False,
 )
 
+
+dialoque_details_vin = dbc.Modal(
+    [
+        dbc.ModalHeader(dbc.ModalTitle("Détail du vin")),
+        dbc.ModalBody(cave.get_input_groups("dialogue_details_vin")),
+        dbc.ModalFooter(
+            dbc.Button("Sauve", id="dialogue_details_vin_button_save", className="ms-auto", n_clicks=0)
+        ),
+    ],
+    id = "dialogue_details",
+    is_open = False,
+)
+
+
+
+
 criteres = html.Div(id="criteres", children=cave.get_selecteurs())
 
 liste_des_vins = dbc.Row(id="liste_des_vins")
@@ -76,6 +94,7 @@ body = dbc.Container([
         ]),
     load_page,
     dialoque_add_vin,
+    dialoque_details_vin,
 ])
 
 

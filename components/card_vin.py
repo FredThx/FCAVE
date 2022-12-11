@@ -23,6 +23,7 @@ class CardVin(dbc.Card):
             'color' : "grey"
         }
             }
+
     def __init__(self, vin, collapse = False):
         super().__init__(style={"width": "18rem"})
         self.vin = vin
@@ -40,6 +41,27 @@ class CardVin(dbc.Card):
     def id(self):
         return f"CardVin_{self.data['id']}"
 
+    @property
+    def id_collapse(self):
+        return {
+                'type' : "dynamic_bt_collapse",
+                'index' : f"{self.id}_collapse"
+                }
+    
+    @property
+    def id_bt_edit(self):
+        return {
+                'type' : "dynamic_bt_edit",
+                'index' : f"{self.id}_bt_edit",
+                }
+
+    @property
+    def id_bt_remove(self):
+        return {
+                'type' : "dynamic_bt_remove",
+                'index' : f"{self.id}_bt_remove",
+                }
+
     def render(self):
         return [
             dbc.CardHeader(
@@ -50,10 +72,7 @@ class CardVin(dbc.Card):
                         dbc.Col(
                             dbc.Switch(
                                 value = not self.collapse,
-                                id = {
-                                    'type' : "dynamic_bt_collapse",
-                                    'index' : f"{self.id}_collapse"
-                                },
+                                id = self.id_collapse,
                                 class_name="me-2"
                             ),
                             align="start",
@@ -72,8 +91,8 @@ class CardVin(dbc.Card):
                     ]),
                     dbc.CardFooter(
                         dbc.Row([
-                            dbc.Col(dbc.Button("Details", color="primary", id = f"{self.id}_bt_edit"), width = 5),
-                            dbc.Col(dbc.Button("Supprime", color="primary", id = f"{self.id}_bt_remove"), width =5),
+                            dbc.Col(dbc.Button("Details", color="primary", id = self.id_bt_edit), width = 5),
+                            dbc.Col(dbc.Button("Supprime", color="primary", id = self.id_bt_remove), width =5),
                         ]),
                     ),
                 ],

@@ -26,8 +26,8 @@ class Vin:
     def get(self, prop):
         return self.__dict__.get(prop)
 
-    def get_card(self):
-        return CardVin(self)
+    def get_card(self, collapse = False):
+        return CardVin(self, collapse)
 
     def match_text(self, text):
         '''Return true if the searched text is in props
